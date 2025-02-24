@@ -15,7 +15,7 @@ It requires:
 We assume you have created a local user and a group named `lega`. If not, you can do it with
 
     groupadd -r lega
-    useradd -M -g lega lega
+	useradd -M -g lega -G docker lega
 
 # Sensitive data
 
@@ -27,7 +27,7 @@ Update the configuration files with the proper settings.
 	cp ../../src/vault/pg_hba.conf.sample  pg_hba.conf
 	cp ../../src/handler/conf.ini.sample   lega.ini
 
-
+==**Ojo!!!**==
 The included message broker uses an administrator account with
 `admin:secret` as `username:password`. This is up to you to update it
 in your production environment.
@@ -47,6 +47,7 @@ Repeat the same for the master key:
 	ssh-keygen -t ed25519 -f master.key -C "master_key@LocalEGA"
 	chown lega master.key
 	chown lega master.key.pub
+**He puesto ega y egamaster como contraseñas rspectivamente.**
 	
 # Mountpoints / File system
 
@@ -83,6 +84,7 @@ Create the docker images with:
 Prepare the vault database 
 
 	echo 'very-strong-password' > pg_vault_su_password
+	**pwd in my case: pgpwd**
 	chmod 600 pg_vault_su_password
 	make init-vault
 	
@@ -95,10 +97,13 @@ commands:
 
 	-- To input data
 	ALTER ROLE lega WITH PASSWORD 'strong-password';
+	ALTER ROLE lega WITH PASSWORD 'pglega';
+	** i wrote pglega **
 
 	-- To distribute data
 	ALTER ROLE distribution WITH PASSWORD 'another-strong-password';
-
+	ALTER ROLE distribution WITH PASSWORD 'pgdist';
+	** i wrote pgdist **
 Update the handler `lega.ini` configuration file, with the `lega` user password from the database.
 
 In the `pg.conf` file, update the `crypt4gh.master_seckey` secret with the hex value of the master private key.  
@@ -111,6 +116,7 @@ key_content = crypt4gh.keys.get_private_key("/path/to/master.key.sec", lambda: "
 
 print(key_content.hex())
 ```
+**remember route now is ./master.key and pwd=legamaster**
 
 The `pg_hba.conf` controls the network accesses to the database.  
 The default supplied one is not very restrictive, and you should adjust it in your production environment.  
